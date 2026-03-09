@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block app_content %}
+
+<!-- Stats Row -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-2">Total Students</h6>
+                <h2 class="mb-0">{{ students|length }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-2">Male Students</h6>
+                <h2 class="mb-0">{{ students|selectattr('gender', 'equalto', 'M')|list|length }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-2">Female Students</h6>
+                <h2 class="mb-0">{{ students|selectattr('gender', 'equalto', 'F')|list|length }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NEW: Course Eligibility Search & Export Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-search me-2"></i>Course Eligibility Export</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <input type="text" id="courseSearchInput" class="form-control" placeholder="Type to search courses (e.g., Engineering, Law, Medicine)...">
+                </div>
+                
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0" id="courseTable">
+                        <thead class="sticky-top">
+                            <tr>
+                                <th>Course Name</th>
+                                <th style="width: 100px;">Code</th>
+                                <th style="width: 150px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in courses %}
+                            <tr class="course-row">
+                                <td>
+                                    <span class="fw-bold">{{ course.name }}</span>
+                                    <br>
+                                    <small class="text-muted d-none d-md-block">
+                                        Essential: {{ course.essential|join(', ') }}
+                                    </small>
+                                </td>
+                                <td><span class="badge bg-secondary rounded-pill">{{ course.code }}</span></td>
+                                <!-- inside the courseTable tbody -->
+                            <td>
+                                <div class="btn-group w-100" role="group">
+                                    <a href="{{ url_for('export_course_students', course_code=course.code) }}" 
+                                    class="btn btn-sm btn-outline-success" 
+                                    title="Export to CSV">
+                                       <i class="bi bi-file-earmark-spreadsheet" style="color:green;"></i>
+                                    </a>
+                                    <a href="{{ url_for('export_course_pdf', course_code=course.code) }}" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    title="Export to PDF">
+                                        <i class="bi bi-file-earmark-pdf"></i>
+                                    </a>
+                                </div>
+                            </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-5 text-muted">
+                                    <i class="bi bi-exclamation-triangle fs-1 d-block mb-2"></i>
+                                    No courses loaded. Ensure 'courses' is passed from the backend.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Actions: Student Registry -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Student Registry</span>
+                <div>
+                    <!-- ADMIN BUTTON START -->
+                    {% if user.role == 'Administrator' %}
+                    <a href="{{ url_for('add_teacher') }}" class="btn btn-outline-success btn-sm me-2">
+                        <i class="bi bi-person-plus"></i> Add Teacher
+                    </a>
+                    {% endif %}
+                    <!-- ADMIN BUTTON END -->
+                    <a href="{{ url_for('add_student') }}" class="btn btn-gold btn-sm">
+                        <i class="bi bi-plus-circle"></i> Add New Student
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Combination</th>
+                                <th>Gender</th>
+                                <th style="width: 200px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in students %}
+                            <tr>
+                                <td><strong>{{ s.name }}</strong></td>
+                                <td><span class="badge bg-secondary rounded-pill">{{ s.combination }}</span></td>
+                                <td>{{ s.gender }}</td>
+                                <td>
+                                    <a href="{{ url_for('edit_student', student_id=s.id) }}" class="btn btn-sm btn-warning me-1" title="Edit Results">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a href="{{ url_for('analyze', student_id=s.id) }}" class="btn btn-sm btn-primary" title="Analyze">
+                                        <i class="bi bi-calculator"></i> Analysis
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    No students registered yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple active search logic
+    document.getElementById('courseSearchInput').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('.course-row');
+        
+        rows.forEach(row => {
+            // Search in both course name and essential subjects
+            let text = row.textContent.toLowerCase();
+            if (text.includes(filter)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<style>
+    /* Make table headers sticky inside the scrollable container */
+    .sticky-top th {
+        background-color: var(--hclv-blue); /* Ensure background stays blue when scrolling */
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card login-card shadow-lg">
+    <div class="card-header">
+        <i class="bi bi-mortarboard-fill text-gold"></i> Institutional Login
+    </div>
+    <div class="card-body p-4">
+        <form method="POST">
+            <div class="mb-4">
+                <label class="form-label text-muted">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-person-fill"></i></span>
+                    <input type="text" name="username" class="form-control border-0 bg-light" placeholder="Enter Username" required>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="form-label text-muted">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-lock-fill"></i></span>
+                    <input type="password" name="password" class="form-control border-0 bg-light" placeholder="Enter Password" required>
+                </div>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    Access Portal <i class="bi bi-arrow-right-circle ms-2"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

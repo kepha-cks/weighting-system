@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block app_content %}
+
+<div class="row">
+    <!-- Left Sidebar: Student Info -->
+    <div class="col-lg-3">
+        <div class="card">
+            <div class="card-header bg-navy text-white text-center">
+                <h5 class="mb-0">Student Profile</h5>
+            </div>
+            <div class="card-body text-center">
+                <!-- ADDED EXPLICIT FULL NAME SECTION -->
+                <div class="mb-3">
+                    <h4 class="text-dark mb-0">{{ student.name }}</h4>
+                    <small class="text-muted d-block mt-1">Full Name</small>
+                </div>
+                
+                <div class="mb-3">
+                    <span class="badge bg-secondary fs-6">{{ student.combination }}</span>
+                </div>
+                <div class="border-top pt-3">
+                    <h1 class="text-gold">{{ o_bonus }}</h1>
+                    <p class="text-muted mb-0">O-Level Bonus</p>
+                </div>
+                <div class="mt-2">
+                    <h4>{{ 1.5 if student.gender == 'F' else 0.0 }}</h4>
+                    <p class="text-muted mb-0">Gender Bonus</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content: Report -->
+    <div class="col-lg-9">
+        {% if prediction %}
+        <div class="alert alert-warning border-start border-4 border-warning mb-4 shadow-sm">
+            <h5><i class="bi bi-lightbulb-fill"></i> Prediction Analysis for {{ active_course }}</h5>
+            <p class="mb-0">{{ prediction.needed }}</p>
+            <ul class="mt-2 mb-0">
+                {% for s in prediction.suggestions %}
+                    <li>{{ s }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <!-- UPDATED HEADER WITH STUDENT NAME -->
+                <span><i class="bi bi-bar-chart-line-fill"></i> Eligibility Report for <strong>{{ student.name }}</strong></span>
+                <a href="{{ url_for('export_report', student_id=student.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-download"></i> Export Excel
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th class="text-center">Weight</th>
+                                <th class="text-center">Cutoff</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in report %}
+                            <tr>
+                                <td><strong>{{ r.code }}</strong></td>
+                                <td>{{ r.course }}</td>
+                                <td class="text-center fs-5 text-primary"><strong>{{ r.weight }}</strong></td>
+                                <td class="text-center">{{ r.cutoff }}</td>
+                                <td class="text-center">
+                                    {% if "✅" in r.status %}
+                                        <span class="badge bg-success rounded-pill px-3 py-1">Qualified</span>
+                                    {% elif "⚠️" in r.status %}
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-1">Borderline</span>
+                                    {% else %}
+                                        <span class="badge bg-danger rounded-pill px-3 py-1">Not Qualified</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ url_for('predict', student_id=student.id, course_code=r.code) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-magic"></i> Predict
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
