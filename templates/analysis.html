@@ -73,10 +73,10 @@
                                 <td class="text-center fs-5 text-primary"><strong>{{ r.weight }}</strong></td>
                                 <td class="text-center">{{ r.cutoff }}</td>
                                 <td class="text-center">
-                                    {% if "✅" in r.status %}
+                                    {% if r.status == "Qualified" %}
                                         <span class="badge bg-success rounded-pill px-3 py-1">Qualified</span>
-                                    {% elif "⚠️" in r.status %}
-                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-1">Borderline</span>
+                                    {% elif r.status == "Borderline" %}
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-1">Almost there</span>
                                     {% else %}
                                         <span class="badge bg-danger rounded-pill px-3 py-1">Not Qualified</span>
                                     {% endif %}
